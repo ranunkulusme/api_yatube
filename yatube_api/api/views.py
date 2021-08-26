@@ -1,14 +1,16 @@
-from rest_framework import viewsets
+from rest_framework import status
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.generics import (ListCreateAPIView,
+from rest_framework.generics import (ListCreateAPIView, get_object_or_404,
                                      RetrieveUpdateDestroyAPIView)
+from rest_framework.response import Response
 
 from posts.models import Comment, Group, Post
 
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 
 
-class PostList(ListCreateAPIView):
+class PostListView(ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
@@ -16,27 +18,23 @@ class PostList(ListCreateAPIView):
         serializer.save(author=self.request.user)
 
 
-class PostDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
+class PostDetailView(ModelViewSet):
     serializer_class = PostSerializer
     lookup_url_kwarg = 'post_id'
 
+    def get_queryset(self):
+        post_id = self.kwargs.get('post_id')
+        new_queryset = Post.objects.filter(pk=post_id)
+        return new_queryset
 
-class CommentsListView(ListCreateAPIView):
+
+class CommentsListView(ModelViewSet):
     serializer_class = CommentSerializer
     lookup_url_kwarg = 'post_id'
 
     def get_queryset(self):
         post_id = self.kwargs['post_id']
-
-        posts = Post.objects.filter(pk=post_id).exists()
-        if not posts:
-            raise PermissionDenied(f'Нет постов с id: {post_id}')
-
         comments = Comment.objects.filter(post=post_id)
-        if not comments.exists():
-            raise PermissionDenied(f'Нет комментариев к посту с id: {post_id}')
-
         return comments
 
     def perform_create(self, serializer):
@@ -44,13 +42,31 @@ class CommentsListView(ListCreateAPIView):
         serializer.save(author=self.request.user, post_id=post_id)
 
 
-class CommentDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Comment.objects.all()
+class CommentDetailView(ModelViewSet):
     serializer_class = CommentSerializer
     lookup_url_kwarg = 'comment_id'
 
+    def get_queryset(self):
+        post_id = self.kwargs['post_id']
+        comments = Comment.objects.filter(post=post_id)
+        return comments
 
-class GroupView(viewsets.ReadOnlyModelViewSet):
+    def perform_update(self, serializer):
+        if serializer.instance.author != self.request.user:
+            raise PermissionDenied(
+                'Изменение чужого контента запрещено!'
+            )
+        super(CommentDetailView, self).perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user:
+            raise PermissionDenied(
+                'Изменение чужого контента запрещено!'
+            )
+        super(CommentDetailView, self).perform_destroy(instance)
+
+
+class GroupView(ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     lookup_url_kwarg = 'group_id'
