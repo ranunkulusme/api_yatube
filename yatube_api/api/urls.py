@@ -1,18 +1,17 @@
 from django.urls import include, path
 from rest_framework.authtoken import views
 
-from .views import (CommentDetailView, CommentsListView, GroupView,
-                    PostDetailView, PostListView)
+from .views import CommentsView, GroupView, PostView
 
-post_list_view = PostListView.as_view({'get': 'list', 'post': 'create'})
-post_detail_view = PostDetailView.as_view(
+post_list_view = PostView.as_view({'get': 'list', 'post': 'create'})
+post_detail_view = PostView.as_view(
     {'get': 'retrieve',
      'patch': 'partial_update',
      'delete': 'destroy'})
-comments_list_view = CommentsListView.as_view(
+comments_list_view = CommentsView.as_view(
     {'get': 'list',
      'post': 'create'})
-comments_detail_view = CommentDetailView.as_view(
+comments_detail_view = CommentsView.as_view(
     {'get': 'retrieve',
      'patch': 'partial_update',
      'delete': 'destroy'})
