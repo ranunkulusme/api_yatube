@@ -15,7 +15,7 @@ class PostView(ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class CommentsListView(ModelViewSet):
+class CommentsView(ModelViewSet):
     serializer_class = CommentSerializer
     lookup_url_kwarg = 'comment_id'
 
