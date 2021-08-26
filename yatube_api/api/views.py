@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-
+from rest_framework.generics import get_object_or_404
 from posts.models import Comment, Group, Post
 
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
@@ -20,8 +20,8 @@ class CommentsView(ModelViewSet):
 
     def get_queryset(self):
         post_id = self.kwargs['post_id']
-        comments = Comment.objects.filter(post=post_id)
-        return comments
+        post = get_object_or_404(Post, id=post_id)
+        return post.comments.all()
 
     def perform_create(self, serializer):
         post_id = self.kwargs['post_id']
