@@ -1,5 +1,6 @@
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.generics import get_object_or_404
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
 from posts.models import Group, Post
 
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
