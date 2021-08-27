@@ -13,6 +13,6 @@ router.register(r'groups', api_views.GroupView)
 urlpatterns = [
     path('v1/', include(router.urls)),
     path('v1/api-token-auth/', views.obtain_auth_token),
-    path('api-auth/', include('rest_framework.urls',
-                              namespace='rest_framework')),
+    path('v1/api-auth/', include('rest_framework.urls',
+                                 namespace='rest_framework')),
 ]
